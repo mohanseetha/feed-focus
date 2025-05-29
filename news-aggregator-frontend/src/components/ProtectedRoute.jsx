@@ -6,7 +6,7 @@ const ProtectedRoute = ({ children }) => {
   const isAuthRoute = location.pathname.startsWith("/auth");
 
   if (!user && !isAuthRoute) {
-    return <Navigate to="/landing" replace />;
+    return <Navigate to="/tryit" replace />;
   }
 
   return children;

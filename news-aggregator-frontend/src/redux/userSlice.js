@@ -17,11 +17,19 @@ const userSlice = createSlice({
       state.username = action.payload.username;
       state.token = action.payload.token;
       state.isLoggedIn = true;
+      localStorage.setItem(
+        "user",
+        JSON.stringify({
+          username: action.payload.username,
+          token: action.payload.token,
+        })
+      );
     },
     logout: (state) => {
       state.username = null;
       state.token = null;
       state.isLoggedIn = false;
+      localStorage.removeItem("user");
     },
   },
 });

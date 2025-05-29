@@ -9,6 +9,8 @@ spring:
 frontend:
   url: http://localhost:5173
 
+# https://news-aggregator-2hfr.onrender.com/
+
 jwt:
   secret: verysecretrandomstringtokenforjwt
 

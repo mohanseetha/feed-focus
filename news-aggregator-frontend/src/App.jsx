@@ -3,7 +3,6 @@ import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { CssBaseline, ThemeProvider } from "@mui/material";
 
 import { lightTheme, darkTheme } from "./theme/theme";
-
 import Auth from "./pages/Auth";
 import Home from "./pages/Home";
 import NotFound from "./pages/NotFound";
@@ -38,15 +37,15 @@ const App = () => {
       <CssBaseline />
       <Router>
         <Routes>
+          {/* Public routes */}
           <Route
-            path="/"
             element={<Layout toggleColorMode={toggleColorMode} mode={mode} />}
           >
             <Route path="auth" element={<Auth />} />
             <Route path="tryit" element={<Landing />} />
           </Route>
+          {/* Protected routes */}
           <Route
-            path="/"
             element={
               <ProtectedRoute>
                 <Layout toggleColorMode={toggleColorMode} mode={mode} />
@@ -56,6 +55,7 @@ const App = () => {
             <Route index element={<Home />} />
             <Route path="profile" element={<Profile />} />
           </Route>
+          {/* Catch-all */}
           <Route path="*" element={<NotFound />} />
         </Routes>
       </Router>
