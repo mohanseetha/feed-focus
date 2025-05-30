@@ -2,6 +2,7 @@ package com.projs.NewsAggregator.repository;
 
 import com.projs.NewsAggregator.model.Article;
 import org.springframework.data.mongodb.repository.MongoRepository;
+import org.springframework.data.mongodb.repository.Query;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -15,5 +16,6 @@ public interface ArticleRepo extends MongoRepository<Article, String> {
 
     void deleteByPublishedAtBefore(LocalDateTime cutoff);
 
+    @Query(value = "{}", fields = "{url: 1, _id: 0}")
     List<String> findAllUrls();
 }
