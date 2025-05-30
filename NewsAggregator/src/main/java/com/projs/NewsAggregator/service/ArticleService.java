@@ -5,6 +5,11 @@ import com.projs.NewsAggregator.repository.ArticleRepo;
 import com.projs.NewsAggregator.util.RssParser;
 import jakarta.annotation.PreDestroy;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.data.mongodb.core.aggregation.Aggregation;
+import org.springframework.data.mongodb.core.aggregation.AggregationOptions;
+import org.springframework.data.mongodb.core.aggregation.AggregationResults;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
@@ -17,11 +22,13 @@ import java.util.concurrent.*;
 public class ArticleService {
     private final ArticleRepo articleRepo;
     private final RssParser rssParser;
+    private final MongoTemplate mongoTemplate;
     private final ExecutorService fetchExecutor = Executors.newFixedThreadPool(10);
 
-    public ArticleService(ArticleRepo articleRepo, RssParser rssParser) {
+    public ArticleService(ArticleRepo articleRepo, RssParser rssParser, MongoTemplate mongoTemplate) {
         this.articleRepo = articleRepo;
         this.rssParser = rssParser;
+        this.mongoTemplate = mongoTemplate;
     }
 
     @Scheduled(fixedDelay = 1800000)
@@ -81,7 +88,18 @@ public class ArticleService {
     }
 
     public List<Article> getAllArticles() {
-        return articleRepo.findAllByOrderByPublishedAtDesc();
+        AggregationOptions options = AggregationOptions.builder()
+                .allowDiskUse(true)
+                .build();
+
+        Aggregation aggregation = Aggregation.newAggregation(
+                Aggregation.sort(Sort.by(Sort.Direction.DESC, "publishedAt"))
+        ).withOptions(options);
+
+        AggregationResults<Article> results =
+                mongoTemplate.aggregate(aggregation, "Articles", Article.class);
+
+        return results.getMappedResults();
     }
 
     public List<Article> getArticlesByTopic(String topic) {
