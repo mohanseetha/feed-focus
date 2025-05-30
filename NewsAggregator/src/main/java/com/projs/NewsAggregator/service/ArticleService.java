@@ -17,8 +17,6 @@ import java.util.concurrent.*;
 public class ArticleService {
     private final ArticleRepo articleRepo;
     private final RssParser rssParser;
-
-    // Executor for async feed fetching
     private final ExecutorService fetchExecutor = Executors.newFixedThreadPool(10);
 
     public ArticleService(ArticleRepo articleRepo, RssParser rssParser) {
@@ -26,7 +24,7 @@ public class ArticleService {
         this.rssParser = rssParser;
     }
 
-    @Scheduled(fixedDelay = 1800000) // 30 mins
+    @Scheduled(fixedDelay = 1800000)
     public void scheduledFetch() {
         log.info("Starting scheduled fetch on thread {}", Thread.currentThread().getName());
         CompletableFuture.runAsync(this::fetchAndSaveArticlesFromRss, fetchExecutor)
@@ -41,11 +39,8 @@ public class ArticleService {
     public void fetchAndSaveArticlesFromRss() {
         try {
             Set<String> existingUrls = new HashSet<>(articleRepo.findAllUrls());
-
             List<RssParser.Article> fetched = rssParser.fetchMultipleFeeds();
-
             List<Article> newArticles = new ArrayList<>();
-
             for (RssParser.Article rssArticle : fetched) {
                 if (!existingUrls.contains(rssArticle.url)) {
                     Article article = new Article(
@@ -60,7 +55,6 @@ public class ArticleService {
                     existingUrls.add(rssArticle.url);
                 }
             }
-
             if (!newArticles.isEmpty()) {
                 articleRepo.saveAll(newArticles);
                 log.info("Saved {} new articles", newArticles.size());

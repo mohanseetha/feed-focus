@@ -46,7 +46,6 @@ public class RssParser {
             SyndFeedInput input = new SyndFeedInput();
             SyndFeed feed = input.build(new XmlReader(url));
             ZonedDateTime now = ZonedDateTime.now(ZoneOffset.UTC);
-
             for (SyndEntry entry : feed.getEntries()) {
                 Date pubDate = entry.getPublishedDate();
                 if (pubDate == null || pubDate.toInstant().isAfter(now.toInstant())) continue;
@@ -80,7 +79,6 @@ public class RssParser {
                 futures.add(future);
             }
         }
-
         return futures.stream()
                 .map(CompletableFuture::join)
                 .flatMap(List::stream)
