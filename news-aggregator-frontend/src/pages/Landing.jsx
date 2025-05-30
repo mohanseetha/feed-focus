@@ -29,12 +29,12 @@ const Landing = () => {
               Stay Ahead with the News That Matters
             </Typography>
             <Typography variant="h6" color="text.secondary">
-              Get curated headlines, trending stories, and real-time updates —
-              all in one place.
+              Get curated headlines, trending stories, and real-time updates all
+              in one place.
             </Typography>
           </Box>
           <Typography variant="body1" color="text.secondary">
-            Whether you're into tech, politics, sports, or lifestyle — our smart
+            Whether you're into tech, politics, sports, or lifestyle our smart
             engine brings you the most relevant articles, tailored to your
             interests.
           </Typography>

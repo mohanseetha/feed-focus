@@ -205,14 +205,19 @@ const Profile = () => {
               You have {user.bookmarks.length} bookmarked articles.
             </Typography>
             <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
-              {user.bookmarks.slice(0, visibleBookmarks).map((article) => (
-                <ArticleCard
-                  key={article._id || article.id || article.url}
-                  article={article}
-                  bookmarks={user.bookmarks}
-                  showTopic={true}
-                />
-              ))}
+              {user.bookmarks
+                .sort(
+                  (a, b) => new Date(b.publishedAt) - new Date(a.publishedAt)
+                )
+                .slice(0, visibleBookmarks)
+                .map((article) => (
+                  <ArticleCard
+                    key={article._id || article.id || article.url}
+                    article={article}
+                    bookmarks={user.bookmarks}
+                    showTopic={true}
+                  />
+                ))}
             </Box>
             {visibleBookmarks < user.bookmarks.length && (
               <Box sx={{ textAlign: "center", mt: 3 }}>
