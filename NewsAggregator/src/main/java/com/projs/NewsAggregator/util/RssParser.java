@@ -10,7 +10,8 @@ import org.jsoup.Jsoup;
 import org.springframework.stereotype.Component;
 
 import java.net.URL;
-import java.time.*;
+import java.time.ZoneOffset;
+import java.time.ZonedDateTime;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
@@ -80,12 +81,9 @@ public class RssParser {
             }
         }
 
-        List<Article> articles = futures
-                .stream()
+        return futures.stream()
                 .map(CompletableFuture::join)
                 .flatMap(List::stream)
                 .collect(Collectors.toList());
-
-        return articles;
     }
 }

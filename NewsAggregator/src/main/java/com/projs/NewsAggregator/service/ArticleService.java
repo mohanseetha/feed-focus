@@ -3,13 +3,14 @@ package com.projs.NewsAggregator.service;
 import com.projs.NewsAggregator.model.Article;
 import com.projs.NewsAggregator.repository.ArticleRepo;
 import com.projs.NewsAggregator.util.RssParser;
+import jakarta.annotation.PreDestroy;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
+import java.util.concurrent.*;
 
 @Slf4j
 @Service
@@ -17,14 +18,19 @@ public class ArticleService {
     private final ArticleRepo articleRepo;
     private final RssParser rssParser;
 
+    // Executor for async feed fetching
+    private final ExecutorService fetchExecutor = Executors.newFixedThreadPool(10);
+
     public ArticleService(ArticleRepo articleRepo, RssParser rssParser) {
         this.articleRepo = articleRepo;
         this.rssParser = rssParser;
     }
 
-    @Scheduled(fixedDelay = 1800000) //  30 mins
+    @Scheduled(fixedDelay = 1800000) // 30 mins
     public void scheduledFetch() {
-        fetchAndSaveArticlesFromRss();
+        log.info("Starting scheduled fetch on thread {}", Thread.currentThread().getName());
+        CompletableFuture.runAsync(this::fetchAndSaveArticlesFromRss, fetchExecutor)
+                .thenRun(() -> log.info("Scheduled fetch finished"));
     }
 
     @Scheduled(cron = "0 0 2 ? * SUN")
@@ -33,21 +39,37 @@ public class ArticleService {
     }
 
     public void fetchAndSaveArticlesFromRss() {
-        List<RssParser.Article> fetched = rssParser.fetchMultipleFeeds();
-        for (RssParser.Article rssArticle : fetched) {
-            if (!articleRepo.existsByUrl(rssArticle.url)) {
-                Article article = new Article(
-                        rssArticle.title,
-                        rssArticle.url,
-                        rssArticle.source,
-                        rssArticle.publishedAt,
-                        rssArticle.summary,
-                        rssArticle.topic
-                );
-                articleRepo.save(article);
+        try {
+            Set<String> existingUrls = new HashSet<>(articleRepo.findAllUrls());
+
+            List<RssParser.Article> fetched = rssParser.fetchMultipleFeeds();
+
+            List<Article> newArticles = new ArrayList<>();
+
+            for (RssParser.Article rssArticle : fetched) {
+                if (!existingUrls.contains(rssArticle.url)) {
+                    Article article = new Article(
+                            rssArticle.title,
+                            rssArticle.url,
+                            rssArticle.source,
+                            rssArticle.publishedAt,
+                            rssArticle.summary,
+                            rssArticle.topic
+                    );
+                    newArticles.add(article);
+                    existingUrls.add(rssArticle.url);
+                }
             }
+
+            if (!newArticles.isEmpty()) {
+                articleRepo.saveAll(newArticles);
+                log.info("Saved {} new articles", newArticles.size());
+            } else {
+                log.info("No new articles to save");
+            }
+        } catch (Exception e) {
+            log.error("Error during fetchAndSaveArticlesFromRss: {}", e.getMessage(), e);
         }
-        log.info("Successfully fetched feeds");
     }
 
     public void deleteWeeklyArticles() {
@@ -55,17 +77,13 @@ public class ArticleService {
             articleRepo.deleteByPublishedAtBefore(LocalDateTime.now().minusWeeks(1));
             log.info("Weekly Clean Successful");
         } catch (Exception e) {
-            log.error(e.getMessage());
+            log.error("Error during weekly delete: {}", e.getMessage(), e);
         }
     }
 
     public Article getArticleById(String id) {
-        Optional<Article> articleOpt = articleRepo.findById(id);
-        Article article = articleOpt.orElse(null);
-        if (article == null) {
-            throw new RuntimeException("Article doesn't exist");
-        }
-        return article;
+        return articleRepo.findById(id)
+                .orElseThrow(() -> new RuntimeException("Article doesn't exist"));
     }
 
     public List<Article> getAllArticles() {
@@ -74,5 +92,10 @@ public class ArticleService {
 
     public List<Article> getArticlesByTopic(String topic) {
         return articleRepo.findByTopicIgnoreCaseOrderByPublishedAtDesc(topic);
+    }
+
+    @PreDestroy
+    public void shutdownExecutor() {
+        fetchExecutor.shutdown();
     }
 }

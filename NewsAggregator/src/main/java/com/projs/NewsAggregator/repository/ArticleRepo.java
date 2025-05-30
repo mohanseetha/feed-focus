@@ -14,4 +14,6 @@ public interface ArticleRepo extends MongoRepository<Article, String> {
     List<Article> findByTopicIgnoreCaseOrderByPublishedAtDesc(String topic);
 
     void deleteByPublishedAtBefore(LocalDateTime cutoff);
+
+    List<String> findAllUrls();
 }
