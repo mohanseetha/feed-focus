@@ -2,12 +2,14 @@ package com.projs.NewsAggregator.controller;
 
 import com.projs.NewsAggregator.model.Article;
 import com.projs.NewsAggregator.service.ArticleService;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+@Slf4j
 @RestController
 @RequestMapping("/api/articles")
 public class ArticleController {
@@ -31,6 +33,7 @@ public class ArticleController {
             }
             return ResponseEntity.status(HttpStatus.OK).body(articles);
         } catch (Exception e) {
+            log.error("Error fetching articles: {}", e.getMessage(), e);
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
         }
     }
