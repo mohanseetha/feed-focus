@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo, useCallback } from "react";
+import React, { useState, useMemo, useCallback, useEffect } from "react";
 import { Box, Typography, CircularProgress, IconButton } from "@mui/material";
 import ArticleCard from "./ArticleCard";
 import {
@@ -9,11 +9,13 @@ import {
 } from "../utils/api";
 import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
+import { useQuery } from "@tanstack/react-query";
 
 const ARTICLES_PER_PAGE = 20;
 
 const ArticleList = ({ props }) => {
   const filterTopic = props?.toLowerCase() || "all";
+
   const user = useMemo(() => {
     try {
       return JSON.parse(localStorage.getItem("user") || "null");
@@ -21,81 +23,50 @@ const ArticleList = ({ props }) => {
       return null;
     }
   }, []);
-  const [articles, setArticles] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
-  const [bookmarks, setBookmarks] = useState([]);
-  const [loadingBookmarks, setLoadingBookmarks] = useState(false);
-  const [bookmarkError, setBookmarkError] = useState("");
+
   const [page, setPage] = useState(1);
 
-  useEffect(() => {
-    let isMounted = true;
-    const fetchArticles = async () => {
-      setLoading(true);
-      setError("");
-      setPage(1);
-      try {
-        let response;
-        if (filterTopic === "all") {
-          response = await getAllArticles();
-        } else if (filterTopic === "your feed") {
-          if (!user?.username) throw new Error("User not logged in.");
-          response = await getUserArticles();
-        } else if (filterTopic === "top stories") {
-          response = await getArticlesByTopic("general");
-        } else {
-          response = await getArticlesByTopic(filterTopic);
-        }
-        if (isMounted) setArticles(response?.data || []);
-      } catch (err) {
-        if (isMounted) {
-          setError(
-            err?.message || "Something went wrong while loading articles."
-          );
-          setArticles([]);
-        }
-      } finally {
-        if (isMounted) setLoading(false);
+  const {
+    data: articlesData,
+    isLoading: loading,
+    isError,
+    error,
+  } = useQuery({
+    queryKey: ["articles", filterTopic, user?.username],
+    queryFn: async () => {
+      if (filterTopic === "all") return await getAllArticles();
+      if (filterTopic === "your feed") {
+        if (!user?.username) throw new Error("User not logged in.");
+        return await getUserArticles();
       }
-    };
-    fetchArticles();
-    return () => {
-      isMounted = false;
-    };
-  }, [filterTopic, user?.username]);
+      if (filterTopic === "top stories")
+        return await getArticlesByTopic("general");
+      return await getArticlesByTopic(filterTopic);
+    },
+    keepPreviousData: true,
+  });
 
-  useEffect(() => {
-    let isMounted = true;
-    const fetchBookmarks = async () => {
-      if (!user?.username) {
-        setBookmarks([]);
-        return;
-      }
-      setLoadingBookmarks(true);
-      setBookmarkError("");
-      try {
-        const response = await getUserProfile();
-        const profile = response?.data || {};
-        if (isMounted) setBookmarks(profile.bookmarks || []);
-      } catch (err) {
-        if (isMounted) {
-          setBookmarkError("Failed to load bookmarks", err?.message || "");
-          setBookmarks([]);
-        }
-      } finally {
-        if (isMounted) setLoadingBookmarks(false);
-      }
-    };
-    fetchBookmarks();
-    return () => {
-      isMounted = false;
-    };
-  }, [user?.username]);
+  const {
+    data: profileData,
+    isLoading: loadingBookmarks,
+    isError: isBookmarkError,
+    error: bookmarkError,
+  } = useQuery({
+    queryKey: ["bookmarks", user?.username],
+    queryFn: async () => {
+      if (!user?.username) return { bookmarks: [] };
+      const res = await getUserProfile();
+      return res || { bookmarks: [] };
+    },
+    enabled: !!user?.username,
+  });
 
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: "auto" });
   }, [page]);
+
+  const articles = articlesData || [];
+  const bookmarks = profileData?.bookmarks || [];
 
   const totalPages = Math.max(
     1,
@@ -111,12 +82,12 @@ const ArticleList = ({ props }) => {
     () => setPage((p) => Math.max(p - 1, 1)),
     []
   );
+
   const handleNextPage = useCallback(
     () => setPage((p) => Math.min(p + 1, totalPages)),
     [totalPages]
   );
 
-  // Pagination logic for modern look: show up to 4 pages, with ellipsis and first/last
   const getPageNumbers = () => {
     if (totalPages <= 4)
       return Array.from({ length: totalPages }, (_, i) => i + 1);
@@ -133,7 +104,6 @@ const ArticleList = ({ props }) => {
           display: "flex",
           justifyContent: "center",
           alignItems: "center",
-
           mt: 6,
           minHeight: "200px",
         }}
@@ -143,11 +113,11 @@ const ArticleList = ({ props }) => {
     );
   }
 
-  if (error) {
+  if (isError) {
     return (
       <Box sx={{ mt: 4, px: 2 }}>
         <Typography variant="h6" color="error" align="center">
-          {error}
+          {error?.message || "Something went wrong while loading articles."}
         </Typography>
       </Box>
     );
@@ -165,9 +135,9 @@ const ArticleList = ({ props }) => {
 
   return (
     <Box sx={{ mt: 4, px: 2 }}>
-      {bookmarkError && (
+      {isBookmarkError && (
         <Typography variant="body2" color="error" align="center" mb={2}>
-          {bookmarkError}
+          {bookmarkError?.message || "Failed to load bookmarks"}
         </Typography>
       )}
       <Box
@@ -188,6 +158,7 @@ const ArticleList = ({ props }) => {
           />
         ))}
       </Box>
+
       <Box
         sx={{
           display: "flex",

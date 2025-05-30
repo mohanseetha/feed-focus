@@ -13,6 +13,7 @@ import {
 import EditIcon from "@mui/icons-material/Edit";
 import ArticleCard from "../components/ArticleCard";
 import { getUserProfile, updatePreferences } from "../utils/api";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 
 const allPreferences = [
   "India",
@@ -33,7 +34,6 @@ const allPreferences = [
 ];
 
 const Profile = () => {
-  const [user, setUser] = useState(null);
   const [visibleBookmarks, setVisibleBookmarks] = useState(5);
   const [showEditor, setShowEditor] = useState(false);
   const [selectedPrefs, setSelectedPrefs] = useState([]);
@@ -42,17 +42,35 @@ const Profile = () => {
     message: "",
     type: "error",
   });
-  const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    const fetchProfile = async () => {
-      setLoading(true);
-      const response = await getUserProfile();
-      setUser(response.data);
-      setLoading(false);
-    };
-    fetchProfile();
-  }, []);
+  const queryClient = useQueryClient();
+
+  const { data: user, isLoading } = useQuery({
+    queryKey: ["userProfile"],
+    queryFn: getUserProfile,
+    select: (res) => res,
+    staleTime: 5 * 60 * 1000,
+  });
+
+  const updatePrefsMutation = useMutation({
+    mutationFn: updatePreferences,
+    onSuccess: async () => {
+      await queryClient.invalidateQueries(["userProfile"]);
+      setShowEditor(false);
+      setSnackbar({
+        open: true,
+        message: "Preferences updated.",
+        type: "success",
+      });
+    },
+    onError: () => {
+      setSnackbar({
+        open: true,
+        message: "Failed to update preferences.",
+        type: "error",
+      });
+    },
+  });
 
   useEffect(() => {
     if (showEditor && user) {
@@ -60,10 +78,7 @@ const Profile = () => {
     }
   }, [showEditor, user]);
 
-  const handleEditClick = () => setShowEditor(true);
-  const handleCancelEdit = () => setShowEditor(false);
-
-  const handleSavePrefs = async () => {
+  const handleSavePrefs = () => {
     if (selectedPrefs.length < 5) {
       setSnackbar({
         open: true,
@@ -72,15 +87,7 @@ const Profile = () => {
       });
       return;
     }
-    await updatePreferences(selectedPrefs);
-    const response = await getUserProfile();
-    setUser(response.data);
-    setShowEditor(false);
-    setSnackbar({
-      open: true,
-      message: "Preferences updated.",
-      type: "success",
-    });
+    updatePrefsMutation.mutate(selectedPrefs);
   };
 
   const togglePreference = (pref) => {
@@ -92,10 +99,9 @@ const Profile = () => {
     );
   };
 
-  const handleViewMore = () => setVisibleBookmarks((prev) => prev + 10);
   const handleSnackbarClose = () => setSnackbar((s) => ({ ...s, open: false }));
 
-  if (loading) {
+  if (isLoading) {
     return (
       <Box
         sx={{
@@ -119,6 +125,7 @@ const Profile = () => {
           {user.username.charAt(0).toUpperCase() + user.username.slice(1)}'s
           Profile
         </Typography>
+
         <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 1 }}>
           <Typography variant="h6" sx={{ fontWeight: 600 }}>
             Preferences
@@ -131,11 +138,12 @@ const Profile = () => {
           <IconButton
             size="small"
             sx={{ color: "#5e4b8b" }}
-            onClick={handleEditClick}
+            onClick={() => setShowEditor(true)}
           >
             <EditIcon fontSize="small" color="primary" />
           </IconButton>
         </Box>
+
         {showEditor ? (
           <>
             <Box
@@ -164,7 +172,7 @@ const Profile = () => {
             <Box sx={{ display: "flex", gap: 1, justifyContent: "flex-end" }}>
               <Button
                 variant="outlined"
-                onClick={handleCancelEdit}
+                onClick={() => setShowEditor(false)}
                 size="small"
                 sx={{ borderRadius: "20px" }}
               >
@@ -192,6 +200,7 @@ const Profile = () => {
             ))}
           </Box>
         )}
+
         <Typography variant="h6" sx={{ fontWeight: "bold", mb: 2, mt: 4 }}>
           Bookmarks
         </Typography>
@@ -216,13 +225,17 @@ const Profile = () => {
             </Box>
             {visibleBookmarks < user.bookmarks.length && (
               <Box sx={{ textAlign: "center", mt: 3 }}>
-                <Button onClick={handleViewMore} sx={{ color: "#5e4b8b" }}>
+                <Button
+                  onClick={() => setVisibleBookmarks((prev) => prev + 10)}
+                  sx={{ color: "#5e4b8b" }}
+                >
                   View more
                 </Button>
               </Box>
             )}
           </>
         )}
+
         <Snackbar
           open={snackbar.open}
           autoHideDuration={3000}

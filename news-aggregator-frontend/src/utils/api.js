@@ -29,16 +29,20 @@ const handleRequest = async (request) => {
 };
 
 export const getAllArticles = () =>
-  handleRequest(() => api.get("/api/articles"));
+  handleRequest(() => api.get("/api/articles")).then((res) => res.data);
 
 export const getArticlesByTopic = (topic) =>
-  handleRequest(() => api.get("/api/articles", { params: { topic } }));
+  handleRequest(() => api.get("/api/articles", { params: { topic } })).then(
+    (res) => res.data
+  );
 
 export const getArticleById = (id) =>
   handleRequest(() => api.get(`/api/articles/${id}`));
 
 export const getUserArticles = () =>
-  handleRequest(() => api.get("/api/users/recommended-articles"));
+  handleRequest(() => api.get("/api/users/recommended-articles")).then(
+    (res) => res.data
+  );
 
 export const addBookmark = (article) =>
   handleRequest(() => api.patch("/api/users/add-bookmark", article));
@@ -58,4 +62,4 @@ export const registerUser = (userData) =>
   handleRequest(() => api.post("/api/users/register", userData));
 
 export const getUserProfile = () =>
-  handleRequest(() => api.get("/api/users/profile"));
+  handleRequest(() => api.get("/api/users/profile")).then((res) => res.data);
