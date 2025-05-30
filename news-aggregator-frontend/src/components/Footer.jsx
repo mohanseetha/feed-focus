@@ -15,7 +15,7 @@ const Footer = () => (
   >
     <Container maxWidth="md" sx={{ textAlign: "center" }}>
       <Typography variant="body2" sx={{ fontSize: "0.9rem", fontWeight: 500 }}>
-        © 2025 <strong>FeedScoop</strong> — Your personalized news digest.
+        © 2025 <strong>FeedFocus</strong> — Your personalized news digest.
       </Typography>
       <Typography
         variant="caption"
