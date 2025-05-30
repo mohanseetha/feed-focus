@@ -4,15 +4,13 @@ spring:
 
   data:
     mongodb:
-      uri: mongodb://localhost:27017/projects
+      uri: ${MONGO_URI}
 
 frontend:
-  url: http://localhost:5173
-
-# https://news-aggregator-2hfr.onrender.com/
+  url: ${FRONTEND_URL}
 
 jwt:
-  secret: verysecretrandomstringtokenforjwt
+  secret: ${JWT_SECRET}
 
 rss:
   feeds:

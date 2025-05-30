@@ -7,6 +7,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -26,6 +27,11 @@ public class ArticleService {
         fetchAndSaveArticlesFromRss();
     }
 
+    @Scheduled(cron = "0 0 2 ? * SUN")
+    public void scheduledDelete() {
+        deleteWeeklyArticles();
+    }
+
     public void fetchAndSaveArticlesFromRss() {
         List<RssParser.Article> fetched = rssParser.fetchMultipleFeeds();
         for (RssParser.Article rssArticle : fetched) {
@@ -42,6 +48,15 @@ public class ArticleService {
             }
         }
         log.info("Successfully fetched feeds");
+    }
+
+    public void deleteWeeklyArticles() {
+        try {
+            articleRepo.deleteByPublishedAtBefore(LocalDateTime.now().minusWeeks(1));
+            log.info("Weekly Clean Successful");
+        } catch (Exception e) {
+            log.error(e.getMessage());
+        }
     }
 
     public Article getArticleById(String id) {

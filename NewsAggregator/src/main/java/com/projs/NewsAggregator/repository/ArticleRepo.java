@@ -3,6 +3,7 @@ package com.projs.NewsAggregator.repository;
 import com.projs.NewsAggregator.model.Article;
 import org.springframework.data.mongodb.repository.MongoRepository;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 public interface ArticleRepo extends MongoRepository<Article, String> {
@@ -11,4 +12,6 @@ public interface ArticleRepo extends MongoRepository<Article, String> {
     List<Article> findAllByOrderByPublishedAtDesc();
 
     List<Article> findByTopicIgnoreCaseOrderByPublishedAtDesc(String topic);
+
+    void deleteByPublishedAtBefore(LocalDateTime cutoff);
 }
