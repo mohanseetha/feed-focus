@@ -18,4 +18,8 @@ public interface ArticleRepo extends MongoRepository<Article, String> {
 
     @Query(value = "{}", fields = "{url: 1, _id: 0}")
     List<String> findAllUrls();
+    
+    List<Article> findTop10000ByOrderByPublishedAtDesc();
+
+    void deleteByPublishedAtLessThan(String cutoff);
 }

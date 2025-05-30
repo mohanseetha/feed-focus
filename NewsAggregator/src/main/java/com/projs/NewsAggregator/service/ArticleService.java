@@ -65,6 +65,7 @@ public class ArticleService {
             if (!newArticles.isEmpty()) {
                 articleRepo.saveAll(newArticles);
                 log.info("Saved {} new articles", newArticles.size());
+                cleanUpIfExceedsLimit();
             } else {
                 log.info("No new articles to save");
             }
@@ -72,6 +73,19 @@ public class ArticleService {
             log.error("Error during fetchAndSaveArticlesFromRss: {}", e.getMessage(), e);
         }
     }
+
+    public void cleanUpIfExceedsLimit() {
+        long totalCount = articleRepo.count();
+        if (totalCount > 30000) {
+            List<Article> latest10k = articleRepo.findTop10000ByOrderByPublishedAtDesc();
+            if (!latest10k.isEmpty()) {
+                String cutoff = latest10k.get(latest10k.size() - 1).getPublishedAt();
+                articleRepo.deleteByPublishedAtLessThan(cutoff);
+                log.info("Cleaned up articles: kept latest 10,000 articles");
+            }
+        }
+    }
+
 
     public void deleteWeeklyArticles() {
         try {
@@ -97,7 +111,7 @@ public class ArticleService {
         ).withOptions(options);
 
         AggregationResults<Article> results =
-                mongoTemplate.aggregate(aggregation, "Articles", Article.class);
+                mongoTemplate.aggregate(aggregation, "articles", Article.class);
 
         return results.getMappedResults();
     }
