@@ -5,6 +5,7 @@ import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.data.mongodb.repository.Query;
 
 import java.time.LocalDateTime;
+import java.util.Collection;
 import java.util.List;
 
 public interface ArticleRepo extends MongoRepository<Article, String> {
@@ -18,6 +19,8 @@ public interface ArticleRepo extends MongoRepository<Article, String> {
 
     @Query(value = "{}", fields = "{url: 1, _id: 0}")
     List<String> findAllUrls();
+
+    List<Article> findByTitleInOrUrlIn(Collection<String> titles, Collection<String> urls);
     
     List<Article> findTop10000ByOrderByPublishedAtDesc();
 

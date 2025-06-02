@@ -38,11 +38,27 @@ public class ArticleService {
 
     public void fetchAndSaveArticlesFromRss() {
         try {
-            Set<String> existingUrls = new HashSet<>(articleRepo.findAllUrls());
             List<RssParser.Article> fetched = rssParser.fetchMultipleFeeds();
+
+            Set<String> fetchedTitles = new HashSet<>();
+            Set<String> fetchedUrls = new HashSet<>();
+            for (RssParser.Article a : fetched) {
+                fetchedTitles.add(a.title);
+                fetchedUrls.add(a.url);
+            }
+
+            List<Article> existingArticles = articleRepo.findByTitleInOrUrlIn(fetchedTitles, fetchedUrls);
+
+            Set<String> existingTitles = new HashSet<>();
+            Set<String> existingUrls = new HashSet<>();
+            for (Article a : existingArticles) {
+                existingTitles.add(a.getTitle());
+                existingUrls.add(a.getUrl());
+            }
+
             List<Article> newArticles = new ArrayList<>();
             for (RssParser.Article rssArticle : fetched) {
-                if (!existingUrls.contains(rssArticle.url)) {
+                if (!existingTitles.contains(rssArticle.title) && !existingUrls.contains(rssArticle.url)) {
                     Article article = new Article(
                             rssArticle.title,
                             rssArticle.url,
@@ -52,7 +68,6 @@ public class ArticleService {
                             rssArticle.topic
                     );
                     newArticles.add(article);
-                    existingUrls.add(rssArticle.url);
                 }
             }
             if (!newArticles.isEmpty()) {
@@ -66,6 +81,7 @@ public class ArticleService {
             log.error("Error during fetchAndSaveArticlesFromRss: {}", e.getMessage(), e);
         }
     }
+
 
     public void cleanUpIfExceedsLimit() {
         long totalCount = articleRepo.count();
