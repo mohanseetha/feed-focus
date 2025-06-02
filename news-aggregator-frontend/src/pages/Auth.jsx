@@ -77,8 +77,9 @@ const Auth = () => {
     e.preventDefault();
     setLoading(true);
     const { username, email, password } = form;
-    try {
-      if (tab === "login") {
+
+    if (tab === "login") {
+      try {
         const result = await loginUser({ username, password });
         if (!result.success) throw new Error(result.error || "Login failed");
         dispatch(login({ username, token: result.data.token }));
@@ -88,7 +89,17 @@ const Auth = () => {
           type: "success",
         });
         navigate("/");
-      } else {
+      } catch (error) {
+        setSnackbar({
+          open: true,
+          message: "Username or password is incorrect.",
+          type: "error",
+        });
+      } finally {
+        setLoading(false);
+      }
+    } else {
+      try {
         if (selectedPreferences.length < 5)
           throw new Error("Please select at least 5 preferences.");
         const reg = await registerUser({
@@ -107,11 +118,15 @@ const Auth = () => {
           type: "success",
         });
         navigate("/");
+      } catch (error) {
+        setSnackbar({
+          open: true,
+          message: "username or email already exists.",
+          type: "error",
+        });
+      } finally {
+        setLoading(false);
       }
-    } catch (err) {
-      setSnackbar({ open: true, message: err.message, type: "error" });
-    } finally {
-      setLoading(false);
     }
   };
 
