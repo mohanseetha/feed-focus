@@ -3,32 +3,32 @@
 .vscode/
 
 # ==========================
-# React Frontend (news-aggregator-frontend)
+# React Frontend (feed-focus-frontend)
 # ==========================
-/news-aggregator-frontend/node_modules/
-/news-aggregator-frontend/dist/
-/news-aggregator-frontend/build/
-/news-aggregator-frontend/coverage/
-/news-aggregator-frontend/.env
-/news-aggregator-frontend/.env.local
-/news-aggregator-frontend/.env.development
-/news-aggregator-frontend/.env.production
-/news-aggregator-frontend/.env.test
-/news-aggregator-frontend/.gitignore
-/news-aggregator-frontend/package-lock.json
+/feed-focus-frontend/node_modules/
+/feed-focus-frontend/dist/
+/feed-focus-frontend/build/
+/feed-focus-frontend/coverage/
+/feed-focus-frontend/.env
+/feed-focus-frontend/.env.local
+/feed-focus-frontend/.env.development
+/feed-focus-frontend/.env.production
+/feed-focus-frontend/.env.test
+/feed-focus-frontend/.gitignore
+/feed-focus-frontend/package-lock.json
 
 # ==========================
-# Spring Boot Backend (NewsAggregator)
+# Spring Boot Backend (feed-focus-backend)
 # ==========================
-/NewsAggregator/.idea/
-/NewsAggregator/target/
-/NewsAggregator/.classpath
-/NewsAggregator/.project
-/NewsAggregator/.env
-/NewsAggregator/.env.local
-/NewsAggregator/.mvn/
-/NewsAggregator/build/
-/NewsAggregator/mvnw
-/NewsAggregator/mvnw.cmd
-/NewsAggregator/.gitignore
-/NewsAggregator/.gitattributes
+/feed-focus-backend/.idea/
+/feed-focus-backend/target/
+/feed-focus-backend/.classpath
+/feed-focus-backend/.project
+/feed-focus-backend/.env
+/feed-focus-backend/.env.local
+/feed-focus-backend/.mvn/
+/feed-focus-backend/build/
+/feed-focus-backend/mvnw
+/feed-focus-backend/mvnw.cmd
+/feed-focus-backend/.gitignore
+/feed-focus-backend/.gitattributes
