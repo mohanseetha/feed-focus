@@ -1,10 +1,7 @@
 # Feed Focus Frontend
-
 Feed Focus is a modern news aggregation platform that brings you personalized, real-time news feeds from around the world. This repository contains the frontend codebase, built with React and Material UI, designed for seamless integration with a Spring Boot backend.
 
----
-
-🚀 **Features**
+**Features**
 
 * **Personalized News Feed**: Get articles tailored to your interests and preferences.
 * **Authentication**: Secure login and registration with JWT-based sessions.
@@ -16,9 +13,7 @@ Feed Focus is a modern news aggregation platform that brings you personalized, r
 * **Protected Routes**: User dashboard and profile are accessible only when logged in.
 * **Error Handling**: Friendly 404 and error screens.
 
----
-
-🛠 **Tech Stack**
+**Tech Stack**
 
 * **React** (with hooks and functional components)
 * **Redux Toolkit** (for state management)
@@ -26,22 +21,20 @@ Feed Focus is a modern news aggregation platform that brings you personalized, r
 * **Axios** (for API requests)
 * **React Router v6**
 
----
-
-📦 **Installation**
+**Installation**
 
 Follow these steps to get FeedScoop Frontend up and running locally:
 
 1.  **Clone the repository:**
-    ```bash
+    ```
     git clone [https://github.com/mohanseetha/feed-focus.git](https://github.com/mohanseetha/feed-focus.git)
     ```
 2.  **Navigate to the project directory:**
-    ```bash
+    ```
     cd feed-focus-frontend
     ```
 3.  **Install dependencies:**
-    ```bash
+    ```
     npm install
     ```
 4.  **Configure environment variables:**
@@ -50,15 +43,13 @@ Follow these steps to get FeedScoop Frontend up and running locally:
     VITE_API_BASE_URL=http://localhost:8080
     ```
 5.  **Start the development server:**
-    ```bash
+    ```
     npm run dev
     ```
 
 The application will be available at `http://localhost:5173` (or your Vite port).
 
----
-
-🖥️ **Project Structure**
+**Project Structure**
 ```
 src/
 ├── components/   # Reusable UI components (ArticleCard, Navbar, etc.)
@@ -70,23 +61,5 @@ src/
 ├── App.jsx       # App entry point
 └── main.jsx      # React root
 ```
-
----
-
-🔐 **Authentication**
-
-* JWT tokens are stored in `localStorage` and sent with every API request.
-* Protected routes automatically redirect to `/auth` if a user is not logged in.
-
----
-
-🌗 **Theming**
-
-* Toggle between dark and light mode using the theme switcher located in the navbar.
-* Your theme preference is conveniently saved in `localStorage` for a consistent experience.
-
----
-
-🤝 **Contributing**
-
+**Contributing**
 Pull requests, issues, and suggestions are welcome! Please open an issue to discuss your ideas or report bugs.
