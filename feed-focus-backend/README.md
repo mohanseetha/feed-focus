@@ -3,7 +3,7 @@ A modular backend for a modern news aggregation platform.
 
 ## Repository Contents
 This repository contains:  
-- **NewsAggregatorBackend**: Spring Boot backend (Java, MongoDB) for user management, RSS feed fetching, article storage, and bookmarks.  
+- **feed-focus-backend**: Spring Boot backend (Java, MongoDB) for user management, RSS feed fetching, article storage, and bookmarks.  
 
 ## Tech Stack
 - Java 17+, Spring Boot 3.x  
@@ -108,4 +108,3 @@ or
 
 ## Contributing
 Pull requests are welcome! Please open an issue to discuss major changes.
-
